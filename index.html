@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#f5f7f2"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <title>ScoutManager Pro</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── DESIGN TOKENS ── */
+    :root {
+      --bg:        #f4f6f1;
+      --surface:   #ffffff;
+      --surface2:  #eef1ea;
+      --border:    #d8ddd2;
+      --accent:    #2d6a2f;
+      --accent2:   #4caf50;
+      --accent-lt: #e8f5e9;
+      --danger:    #c0392b;
+      --warn:      #e67e22;
+      --text:      #1a1f17;
+      --text2:     #5a6354;
+      --text3:     #9aa893;
+      --gold:      #d4a017;
+      --silver:    #8a9ba8;
+      --bronze:    #a0522d;
+      --radius:    10px;
+      --shadow:    0 2px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 6px 30px rgba(0,0,0,0.13);
+      --font-h:    'Barlow Condensed', sans-serif;
+      --font-b:    'Barlow', sans-serif;
+    }
+
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; }
+    body {
+      font-family: var(--font-b);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    input, select, textarea, button { font-family: var(--font-b); }
+
+    /* ── TOP HEADER ── */
+    .app-header {
+      background: var(--accent);
+      color: #fff;
+      padding: 14px 16px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .app-header .logo {
+      font-family: var(--font-h);
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      flex: 1;
+    }
+    .app-header .logo span { color: var(--accent2); }
+    .team-badge {
+      font-family: var(--font-h);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+    }
+
+    /* ── TAB NAV ── */
+    .tab-nav {
+      display: flex;
+      background: var(--accent);
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 4px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.55);
+      font-family: var(--font-h);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .2s;
+      border-bottom: 3px solid transparent;
+    }
+    .tab-btn.active {
+      color: #fff;
+      border-bottom-color: var(--accent2);
+    }
+
+    /* ── MAIN CONTENT ── */
+    .tab-content { display: none; flex: 1; padding: 16px; overflow-y: auto; }
+    .tab-content.active { display: block; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+    .card-title {
+      font-family: var(--font-h);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 16px;
+      background: var(--accent2);
+      border-radius: 2px;
+    }
+
+    /* ── FORM ELEMENTS ── */
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text2);
+      margin-bottom: 5px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.95rem;
+      transition: border-color .2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: #fff;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 11px 18px;
+      border: none;
+      border-radius: 7px;
+      font-family: var(--font-h);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .2s;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:active { background: #1e4d20; }
+    .btn-secondary { background: var(--surface2); color: var(--accent); border: 1.5px solid var(--border); }
+    .btn-accent { background: var(--accent2); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 7px 12px; font-size: 0.78rem; width: auto; margin-bottom: 0; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn-row .btn { margin-bottom: 0; }
+
+    /* ── STATS GRID ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .stat-field {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 8px 10px;
+    }
+    .stat-field label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--text2);
+      display: block;
+      margin-bottom: 3px;
+    }
+    .stat-field .multiplied {
+      font-size: 0.6rem;
+      color: var(--accent2);
+      font-weight: 600;
+    }
+    .stat-field input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      padding: 0;
+    }
+    .stat-field input:focus { outline: none; }
+    .stat-field.full-width { grid-column: 1 / -1; }
+
+    /* ── SECTION DIVIDER ── */
+    .section-divider {
+      font-family: var(--font-h);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text3);
+      padding: 10px 0 6px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+      grid-column: 1 / -1;
+    }
+
+    /* ── PLAYER SELECTOR ── */
+    .player-select-wrap {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .player-select-wrap select { flex: 1; margin: 0; }
+
+    /* ── BADGE / TAG ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .badge-pos-DEL { background: #fde8e8; color: var(--danger); }
+    .badge-pos-EXT { background: #fff3e0; color: var(--warn); }
+    .badge-pos-MED { background: #e8f5e9; color: var(--accent); }
+    .badge-pos-DEF { background: #e3f2fd; color: #1565c0; }
+    .badge-pos-POR { background: #f3e5f5; color: #6a1b9a; }
+
+    /* ── PLAYER LIST (Pestaña 1 - sección jugadores) ── */
+    .player-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border-radius: 7px;
+      margin-bottom: 6px;
+      border: 1px solid var(--border);
+    }
+    .player-item .p-name { flex: 1; font-weight: 600; font-size: 0.9rem; }
+    .player-item .p-num {
+      font-family: var(--font-h);
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text3);
+      min-width: 24px;
+      text-align: center;
+    }
+    .player-photo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-h);
+      font-weight: 800;
+      color: var(--text3);
+      font-size: 0.8rem;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .player-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ── RANKING CARDS (Pestaña 2) ── */
+    .rank-section { margin-bottom: 18px; }
+    .rank-section-title {
+      font-family: var(--font-h);
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding: 8px 0;
+      border-bottom: 2px solid var(--accent2);
+      margin-bottom: 10px;
+    }
+    .rank-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .rank-pos {
+      font-family: var(--font-h);
+      font-size: 1.6rem;
+      font-weight: 800;
+      min-width: 32px;
+      text-align: center;
+    }
+    .rank-pos.gold { color: var(--gold); }
+    .rank-pos.silver { color: var(--silver); }
+    .rank-pos.bronze { color: var(--bronze); }
+    .rank-pos.normal { color: var(--text3); }
+    .rank-info { flex: 1; }
+    .rank-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+    .rank-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .rank-stat {
+      background: var(--surface2);
+      border-radius: 5px;
+      padding: 3px 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .rank-stat .val { color: var(--accent); font-weight: 800; }
+    .rank-score {
+      font-family: var(--font-h);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      z-index: 999;
+      opacity: 0;
+      transition: all .3s;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: var(--shadow-lg);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: 16px 16px 0 0;
+      padding: 20px 16px 30px;
+      width: 100%;
+      max-height: 85dvh;
+      overflow-y: auto;
+    }
+    .modal-title {
+      font-family: var(--font-h);
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    /* ── HISTORY ── */
+    .history-item {
+      border-left: 3px solid var(--accent2);
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      background: var(--bg);
+      border-radius: 0 7px 7px 0;
+    }
+    .history-item .h-date { font-size: 0.7rem; color: var(--text3); font-weight: 600; }
+    .history-item .h-info { font-size: 0.85rem; margin-top: 2px; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--text3);
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .empty-state p { font-size: 0.85rem; }
+
+    /* ── SCORE BOX ── */
+    .score-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .score-team { font-family: var(--font-h); font-size: 0.9rem; font-weight: 700; text-align: center; flex: 1; }
+    .score-num-wrap { display: flex; gap: 8px; align-items: center; }
+    .score-input {
+      width: 52px !important;
+      text-align: center;
+      font-family: var(--font-h) !important;
+      font-size: 1.8rem !important;
+      font-weight: 800 !important;
+      padding: 6px 4px !important;
+    }
+    .score-sep { font-family: var(--font-h); font-size: 1.5rem; font-weight: 800; color: var(--text3); }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ── COLLAPSIBLE ── */
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .collapsible-header .arrow {
+      transition: transform .2s;
+      color: var(--text3);
+    }
+    .collapsible-header.open .arrow { transform: rotate(180deg); }
+    .collapsible-body { display: none; padding-top: 12px; }
+    .collapsible-body.open { display: block; }
+
+    /* ── JORNADA HISTORY LIST ── */
+    .jornada-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    .jornada-item:active { background: var(--accent-lt); }
+    .j-comp {
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-h);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .j-info { flex: 1; }
+    .j-rival { font-weight: 700; font-size: 0.88rem; }
+    .j-date { font-size: 0.7rem; color: var(--text3); }
+    .j-score {
+      font-family: var(--font-h);
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    /* Photo upload */
+    .photo-upload-btn {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      border: 2px dashed var(--border);
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1.4rem; color: var(--text3);
+      overflow: hidden; flex-shrink: 0;
+    }
+    .photo-upload-btn img { width: 100%; height: 100%; object-fit: cover; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div>
+    <div class="logo">SCOUT<span>MGR</span></div>
+    <div class="team-badge" id="headerTeam">Sin equipo</div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:0.7rem;color:rgba(255,255,255,0.6);font-weight:600" id="headerDate"></div>
+    <div style="font-size:0.72rem;color:rgba(255,255,255,0.5)" id="headerJornada"></div>
+  </div>
+</header>
+
+<!-- TAB NAV -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('tab-registro')">📋 Registro</button>
+  <button class="tab-btn" onclick="switchTab('tab-resumen')">📊 Resumen</button>
+  <button class="tab-btn" onclick="switchTab('tab-historial')">🕒 Historial</button>
+  <button class="tab-btn" onclick="switchTab('tab-config')">⚙️ Config</button>
+</nav>
+
+<!-- ══════════════ TAB 1: REGISTRO ══════════════ -->
+<div id="tab-registro" class="tab-content active">
+
+  <!-- SECCIÓN: JUGADORES -->
+  <div class="card">
+    <div class="card-title">Plantilla</div>
+    <button class="btn btn-secondary btn-sm" onclick="openModal('modal-add-player')" style="width:100%;margin-bottom:10px">
+      ➕ Añadir jugador
+    </button>
+    <div id="playerList">
+      <div class="empty-state"><div class="icon">👥</div><p>No hay jugadores registrados</p></div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN: DATOS DE JORNADA -->
+  <div class="card">
+    <div class="card-title">Datos de la Jornada</div>
+
+    <div class="form-group">
+      <label>Tipo de competición</label>
+      <select id="comp-type">
+        <option value="">Seleccionar...</option>
+        <option>Liga</option>
+        <option>Copa</option>
+        <option>UEFA Champions League</option>
+        <option>Europa League</option>
+        <option>Supercopa Nacional</option>
+        <option>Supercopa de la UEFA</option>
+        <option>Amistoso</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Jornada / Instancia</label>
+      <select id="jornada-type" onchange="toggleJornadaInput()">
+        <option value="numero">Número de jornada (Liga)</option>
+        <option value="fase">Fase eliminatoria</option>
+      </select>
+    </div>
+    <div id="jornada-numero-wrap" class="form-group">
+      <input type="number" id="jornada-num" min="1" max="46" placeholder="Jornada (1–46)"/>
+    </div>
+    <div id="jornada-fase-wrap" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fase</label>
+          <select id="jornada-fase">
+            <option>Fase de grupos</option>
+            <option>32avos</option>
+            <option>16avos</option>
+            <option>8avos</option>
+            <option>Cuartos</option>
+            <option>Semifinal</option>
+            <option>Final</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Partido</label>
+          <select id="jornada-partido">
+            <option>Ida</option>
+            <option>Vuelta</option>
+            <option>Partido único</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Equipo local (tuyo)</label>
+      <input type="text" id="team-home" placeholder="Nombre de tu equipo" oninput="saveHomeTeam()"/>
+    </div>
+
+    <div class="form-group">
+      <label>Equipo rival</label>
+      <div style="display:flex;gap:8px">
+        <select id="team-away" style="flex:1">
+          <option value="">Seleccionar rival...</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="openModal('modal-add-rival')">+</button>
+      </div>
+    </div>
+
+    <!-- MARCADOR -->
+    <div class="score-box">
+      <div class="score-team" id="score-home-name">Local</div>
+      <div class="score-num-wrap">
+        <input type="number" class="form-group input score-input" id="score-home" min="0" value="0" style="border:1.5px solid var(--border);border-radius:7px;background:var(--bg)"/>
+        <span class="score-sep">-</span>
+        <input type="number" class="form-group input score-input" id="score-away" min="0" value="0" style="border:1.5px solid var(--border);border-radius:7px;background:var(--bg)"/>
+      </div>
+      <div class="score-team" id="score-away-name">Rival</div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN: STATS DEL PARTIDO -->
+  <div class="card">
+    <div class="card-title">Estadísticas del partido</div>
+    <div class="player-select-wrap">
+      <select id="stat-player-select" style="flex:1">
+        <option value="">Seleccionar jugador...</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="loadPlayerStats()">Cargar</button>
+    </div>
+
+    <div id="stats-form-container">
+      <div class="empty-state"><div class="icon">⚽</div><p>Selecciona un jugador para ingresar estadísticas</p></div>
+    </div>
+
+    <div id="stats-actions" style="display:none;margin-top:14px">
+      <button class="btn btn-primary" onclick="savePlayerStats()">💾 Guardar estadísticas</button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN: GENERAR INFORME -->
+  <div class="card">
+    <div class="card-title">Generar Informe</div>
+    <button class="btn btn-accent" onclick="exportMatchReport()">📄 Informe de jugadores (CSV)</button>
+    <button class="btn btn-primary" onclick="exportFullReport()">📊 Informe completo con resultado</button>
+  </div>
+
+</div>
+
+<!-- ══════════════ TAB 2: RESUMEN ══════════════ -->
+<div id="tab-resumen" class="tab-content">
+  <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
+    <select id="filter-comp" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);-webkit-appearance:none" onchange="renderResumen()">
+      <option value="">Todas las competiciones</option>
+      <option>Liga</option>
+      <option>Copa</option>
+      <option>UEFA Champions League</option>
+      <option>Europa League</option>
+      <option>Supercopa Nacional</option>
+      <option>Supercopa de la UEFA</option>
+      <option>Amistoso</option>
+    </select>
+  </div>
+  <div id="resumen-container">
+    <div class="empty-state"><div class="icon">📊</div><p>Registra jornadas para ver el resumen</p></div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 3: HISTORIAL ══════════════ -->
+<div id="tab-historial" class="tab-content">
+  <div id="historial-container">
+    <div class="empty-state"><div class="icon">🕒</div><p>No hay jornadas registradas aún</p></div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 4: CONFIG ══════════════ -->
+<div id="tab-config" class="tab-content">
+  <div class="card">
+    <div class="card-title">Configuración</div>
+    <div class="form-group">
+      <label>Nombre del equipo</label>
+      <input type="text" id="config-team" placeholder="Mi equipo" oninput="saveConfig()"/>
+    </div>
+    <div class="form-group">
+      <label>Temporada</label>
+      <input type="text" id="config-season" placeholder="ej. 2024/25" oninput="saveConfig()"/>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Datos</div>
+    <button class="btn btn-secondary" onclick="exportAllData()">💾 Exportar todos los datos (JSON)</button>
+    <button class="btn btn-secondary" onclick="importData()">📂 Importar datos (JSON)</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="loadImportFile(event)"/>
+    <div style="margin-top:8px;padding:10px;background:var(--accent-lt);border-radius:7px;font-size:0.78rem;color:var(--accent)">
+      ℹ️ Los datos se guardan automáticamente en tu teléfono. Usa "Exportar" para hacer copias de seguridad.
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:var(--danger)">Zona peligrosa</div>
+    <button class="btn btn-danger" onclick="clearAllData()">🗑️ Borrar todos los datos</button>
+  </div>
+</div>
+
+<!-- ══════════════ MODALES ══════════════ -->
+
+<!-- Modal: Añadir jugador -->
+<div class="modal-overlay" id="modal-add-player">
+  <div class="modal">
+    <div class="modal-title">Nuevo Jugador</div>
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">
+      <div>
+        <label class="photo-upload-btn" id="photo-preview" for="photo-input" title="Añadir foto (opcional)">📷
+          <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="previewPhoto(event)"/>
+        </label>
+        <div style="font-size:0.65rem;color:var(--text3);text-align:center;margin-top:4px">Foto opt.</div>
+      </div>
+      <div style="flex:1">
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input type="text" id="player-name" placeholder="Nombre del jugador"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Dorsal</label>
+            <input type="number" id="player-num" min="1" max="99" placeholder="Nº"/>
+          </div>
+          <div class="form-group">
+            <label>Posición</label>
+            <select id="player-pos">
+              <option value="DEL">Delantero</option>
+              <option value="EXT">Extremo</option>
+              <option value="MED">Mediocentro</option>
+              <option value="DEF">Def. Lateral</option>
+              <option value="POR">Portero</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-player')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addPlayer()">Añadir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Añadir rival -->
+<div class="modal-overlay" id="modal-add-rival">
+  <div class="modal">
+    <div class="modal-title">Nuevo Rival</div>
+    <div class="form-group">
+      <label>Nombre del equipo rival</label>
+      <input type="text" id="rival-name" placeholder="Nombre del rival"/>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-rival')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addRival()">Añadir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Historial jugador -->
+<div class="modal-overlay" id="modal-player-history">
+  <div class="modal">
+    <div class="modal-title" id="modal-history-title">Historial</div>
+    <div id="modal-history-content"></div>
+    <button class="btn btn-secondary" style="margin-top:14px" onclick="closeModal('modal-player-history')">Cerrar</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js");}</script>
+<script src="app.js"></script>
+</body>
+</html>
