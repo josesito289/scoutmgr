@@ -552,6 +552,7 @@
 <nav class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('tab-registro')">📋 Registro</button>
   <button class="tab-btn" onclick="switchTab('tab-resumen')">📊 Resumen</button>
+  <button class="tab-btn" onclick="switchTab('tab-plantilla')">👤 Plantilla</button>
   <button class="tab-btn" onclick="switchTab('tab-historial')">🕒 Historial</button>
   <button class="tab-btn" onclick="switchTab('tab-config')">⚙️ Config</button>
 </nav>
@@ -664,16 +665,44 @@
       <div class="empty-state"><div class="icon">⚽</div><p>Selecciona un jugador para ingresar estadísticas</p></div>
     </div>
 
-    <div id="stats-actions" style="display:none;margin-top:14px">
-      <button class="btn btn-primary" onclick="savePlayerStats()">💾 Guardar estadísticas</button>
-    </div>
+    <div id="stats-actions" style="display:none"></div>
   </div>
 
-  <!-- SECCIÓN: GENERAR INFORME -->
-  <div class="card">
-    <div class="card-title">Generar Informe</div>
-    <button class="btn btn-accent" onclick="exportMatchReport()">📄 Informe de jugadores (CSV)</button>
-    <button class="btn btn-primary" onclick="exportFullReport()">📊 Informe completo con resultado</button>
+  <!-- SECCIÓN: ACCIÓN DE JORNADA -->
+  <div class="card" id="jornada-actions-card">
+    <div class="card-title">Acciones de Jornada</div>
+
+    <!-- Contador de jugadores guardados -->
+    <div id="players-counter" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;margin-bottom:12px;border:1.5px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text2)">Jugadores en esta jornada</div>
+        <div style="font-family:var(--font-h);font-size:1.4rem;font-weight:800;color:var(--accent)" id="counter-display">0 / 11 mín.</div>
+      </div>
+      <div id="counter-icon" style="font-size:1.8rem">⏳</div>
+    </div>
+
+    <!-- Lista de jugadores guardados en esta jornada -->
+    <div id="jornada-players-list" style="margin-bottom:12px"></div>
+
+    <!-- Botón 1: Guardado parcial (siempre visible) -->
+    <button class="btn btn-secondary" id="btn-save-partial" onclick="savePlayerStats()" disabled style="opacity:0.5">
+      💾 Guardado parcial jugador
+    </button>
+
+    <!-- Botón 2: Exportar stats jugadores -->
+    <button class="btn btn-accent" id="btn-export-players" onclick="exportMatchReport()" disabled style="opacity:0.5">
+      📄 Exportar stats jugadores (CSV)
+    </button>
+
+    <!-- Botón 3: Exportar con resultado -->
+    <button class="btn btn-primary" id="btn-export-full" onclick="exportFullReport()" disabled style="opacity:0.5">
+      📊 Exportar jornada completa con resultado (CSV)
+    </button>
+
+    <!-- Botón 4: Limpiar jornada -->
+    <button class="btn btn-danger" id="btn-clear-jornada" onclick="clearJornada()" disabled style="opacity:0.5">
+      🗑️ Limpiar datos de esta jornada
+    </button>
   </div>
 
 </div>
@@ -697,7 +726,96 @@
   </div>
 </div>
 
-<!-- ══════════════ TAB 3: HISTORIAL ══════════════ -->
+<!-- ══════════════ TAB 3: PLANTILLA ══════════════ -->
+<div id="tab-plantilla" class="tab-content">
+  <div class="card">
+    <div class="card-title">Datos de Plantilla</div>
+    <div style="font-size:0.78rem;color:var(--text2);margin-bottom:12px;line-height:1.5">
+      Gestiona los datos contractuales y de mercado de cada jugador. Selecciona un jugador para editar sus datos.
+    </div>
+    <div class="form-group">
+      <label>Jugador</label>
+      <select id="plantilla-player-select" onchange="loadPlantillaPlayer()">
+        <option value="">Seleccionar jugador...</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="plantilla-form-card" style="display:none" class="card">
+    <div class="card-title" id="plantilla-player-title">Datos del jugador</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Media (valoración)</label>
+        <input type="number" id="pf-media" min="0" max="99" placeholder="ej. 78" oninput="onPlantillaInput()"/>
+      </div>
+      <div class="form-group">
+        <label>Edad</label>
+        <input type="number" id="pf-edad" min="15" max="45" placeholder="ej. 24" oninput="onPlantillaInput()"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Salario semanal (€)</label>
+        <input type="number" id="pf-salario-sem" min="0" placeholder="ej. 15000" oninput="calcSalarioAnual()"/>
+      </div>
+      <div class="form-group">
+        <label>Salario anual (€) <span style="color:var(--accent2);font-size:0.6rem">AUTO ×50</span></label>
+        <input type="number" id="pf-salario-anual" readonly style="background:var(--surface2);color:var(--text2)" placeholder="Auto"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Duración contrato (años)</label>
+        <input type="number" id="pf-contrato" min="0" max="10" step="0.5" placeholder="ej. 2" oninput="onPlantillaInput()"/>
+      </div>
+      <div class="form-group">
+        <label>Valor de mercado (€)</label>
+        <input type="number" id="pf-valor" min="0" placeholder="ej. 5000000" oninput="onPlantillaInput()"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Acción</label>
+      <select id="pf-accion" onchange="onPlantillaInput()">
+        <option value="">Sin definir</option>
+        <option>CEDER</option>
+        <option>VENDER</option>
+        <option>RENOVAR</option>
+        <option>NO RENOVAR</option>
+        <option>Cedido</option>
+        <option>Vendido</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Procedencia</label>
+        <input type="text" id="pf-procedencia" placeholder="ej. Cantera, Fichaje..." oninput="onPlantillaInput()"/>
+      </div>
+      <div class="form-group">
+        <label>Nuevo equipo</label>
+        <input type="text" id="pf-nuevo-equipo" placeholder="si aplica" oninput="onPlantillaInput()"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Nacionalidad</label>
+      <input type="text" id="pf-nacionalidad" placeholder="ej. ESP, COL..." oninput="onPlantillaInput()"/>
+    </div>
+
+    <button class="btn btn-primary" onclick="savePlantillaPlayer()">💾 Guardar datos</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Exportar Plantilla</div>
+    <button class="btn btn-accent" onclick="exportPlantillaCSV()">📄 Exportar plantilla completa (CSV)</button>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 4: HISTORIAL ══════════════ -->
 <div id="tab-historial" class="tab-content">
   <div id="historial-container">
     <div class="empty-state"><div class="icon">🕒</div><p>No hay jornadas registradas aún</p></div>
