@@ -221,7 +221,7 @@ function renderPlayerList() {
     const inJornada = state.pendingStats[p.id] ? ' ✅' : '';
     return '<div class="player-item">' +
       '<div class="p-num">'+(p.num||'—')+'</div>' +
-      '<div class="player-photo" onclick="openPlayerHistory(''+p.id+'')">' +
+      '<div class="player-photo" onclick="openPlayerHistory(\'' + p.id + '\')">' +
         (p.photo ? '<img src="'+p.photo+'" alt="'+p.name+'"/>' : initials(p.name)) +
       '</div>' +
       '<div style="flex:1;min-width:0">' +
@@ -231,8 +231,8 @@ function renderPlayerList() {
           posDetail + calBadge +
         '</div>' +
       '</div>' +
-      '<button class="btn btn-secondary btn-sm" onclick="openPlayerHistory(''+p.id+'')">📈</button>' +
-      '<button class="btn btn-danger btn-sm" onclick="removePlayer(''+p.id+'')">✕</button>' +
+      '<button class="btn btn-secondary btn-sm" onclick="openPlayerHistory(\'' + p.id + '\')" >📈</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="removePlayer(\'' + p.id + '\')" >✕</button>' +
     '</div>';
   }).join('');
 }
