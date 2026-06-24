@@ -83,6 +83,18 @@ function load() {
 
 function init() {
   load();
+
+  // Register DOM event listeners safely inside init
+  document.querySelectorAll('.modal-overlay').forEach(function(m) {
+    m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('open'); });
+  });
+  const awayEl = document.getElementById('team-away');
+  if (awayEl) {
+    awayEl.addEventListener('change', function() {
+      document.getElementById('score-away-name').textContent = this.value || 'Rival';
+    });
+  }
+
   if (!state.players || state.players.length === 0) {
     state.players = JSON.parse(JSON.stringify(PRELOADED_PLAYERS));
     save();
@@ -123,9 +135,7 @@ function switchTab(id) {
 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
-});
+// modal close on backdrop - registered in init()
 
 function showToast(msg, duration=2400) {
   const t = document.getElementById('toast');
@@ -242,9 +252,7 @@ function renderRivalsSelect() {
     state.rivals.map(r => '<option value="'+r+'"'+(r===cur?' selected':'')+'>'+r+'</option>').join('');
   if (cur) document.getElementById('score-away-name').textContent = cur;
 }
-document.getElementById('team-away').addEventListener('change', function() {
-  document.getElementById('score-away-name').textContent = this.value || 'Rival';
-});
+// team-away listener - registered in init()
 
 function getJornadaLabel() {
   const type = document.getElementById('jornada-type').value;
@@ -717,4 +725,4 @@ function clearAllData() {
   init(); showToast('🗑️ Datos borrados');
 }
 
-init();
+document.addEventListener('DOMContentLoaded', function() { init(); });
